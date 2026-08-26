@@ -1,5 +1,3 @@
-# from src.connection import get_db_config
-
 from contextlib import closing
 
 from src.connection import get_connection
@@ -52,8 +50,8 @@ def get_stops_by_mode():
                         CASE r.route_type
                             WHEN 0 THEN 'Tramway'
                             WHEN 1 THEN 'Métro'
-                            WHEN 2 THEN 'RER'
-                        END AS mode_transport,
+                            WHEN 2 THEN 'RER'   
+                            END AS mode_transport,                        
                         COUNT(DISTINCT st.stop_id) AS nombre_arrets
                     FROM routes AS r
                     INNER JOIN trips AS t
@@ -65,7 +63,6 @@ def get_stops_by_mode():
                     ORDER BY nombre_arrets DESC;
                     """
                 )
-
                 return cur.fetchall()
 
 
@@ -144,62 +141,3 @@ def get_transfers_by_station():
                 )
 
                 return cur.fetchall()
-
-
-if __name__ == "__main__":
-    print("\n--- 1. ARRÊTS PAR MODE DE TRANSPORT ---")
-    for mode, count in get_stops_by_mode():
-        print(f"{mode} : {count} arrêts")
-
-    print("\n--- 2. TOP 10 LIGNES (NOMBRE D'ARRÊTS) ---")
-    for short_name, long_name, count in get_top_10_routes_by_stops():
-        print(f"[{short_name}] {long_name} : {count} arrêts")
-
-    print("\n--- 3. PLUS GRANDE AMPLITUDE HORAIRE ---")
-    amplitude_row = get_max_amplitude_route()
-    if amplitude_row:
-        short_name, long_name, debut, fin, delta = amplitude_row
-        print(f"[{short_name}] {long_name}")
-        print(f"Premier passage: {debut} | Dernier passage: {fin} | Amplitude: {delta}")
-
-    print("\n--- 4. CORRESPONDANCES PAR STATION ---")
-    for station, count in get_transfers_by_station():
-        print(f"{station} : {count} arrêts rattachés")
-
-# if __name__ == "__main__":
-#     tables = ["routes", "trips", "stop_times", "stops"]
-
-#     for table in tables:
-#         print(f"\n--- {table} ---")
-
-#         for column_name, data_type in list_columns(table):
-#             print(f"{column_name} : {data_type}")
-
-# def list_tables():
-#     connection = None
-
-#     try:
-#         connection = psycopg2.connect(**get_db_config())
-
-#         with connection.cursor() as cursor:
-#             cursor.execute(
-#                 """
-#                 SELECT table_name
-#                 FROM information_schema.tables
-#                 WHERE table_schema = 'public'
-#                 ORDER BY table_name;
-#                 """
-#             )
-
-#             return cursor.fetchall()
-
-#     finally:
-#         if connection is not None:
-#             connection.close()
-
-
-# if __name__ == "__main__":
-#     tables = list_tables()
-
-#     for table in tables:
-#         print(table[0])
